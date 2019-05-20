@@ -1,0 +1,42 @@
+sudo: false
+addons:
+  apt:
+    packages:
+      - oracle-java8-installer
+      - oracle-java8-set-default
+
+language: php
+
+php:
+  - 5.4
+  - 5.5
+  - 5.6
+  - 7
+  - nightly
+  - hhvm
+
+install:
+  - bash ./ci/_composer_install.sh
+  - mkdir -p build/logs
+  - bash ./ci/start-ci.sh $ORIENTDB_VERSION
+
+cache:
+  directories:
+  - ./vendor
+
+before_cache:
+- ls -la ./ci/environment/
+- rm -f ./ci/environment/orientdb-community-$ORIENTDB_VERSION/log/*
+- rm -rf ./ci/environment/orientdb-community-$ORIENTDB_VERSION/databases/*
+
+script:
+ - ./vendor/bin/phpunit --coverage-clover build/logs/clover.xml
+
+after_script:
+ - php ./vendor/bin/coveralls -v
+
+env:
+#  - ORIENTDB_VERSION=3.0.0m1
+  - ORIENTDB_VERSION=2.2.20
+  - ORIENTDB_VERSION=2.2.19
+  - ORIENTDB_VERSION=2.2.9
